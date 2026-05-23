@@ -1,9 +1,18 @@
 <template>
   <div class="user-table-container">
-    <h1>User</h1>
+    <div>
+      <button>C</button>
+      <input type="text" value="" />
+      <button>D</button>
+    </div>
     <table class="user-table">
       <thead>
         <tr>
+          <th>
+            <input type="checkbox" />
+          </th>
+          <th>IDs</th>
+          <th>edit</th>
           <th @click="sort('name')" class="sortable">
             Name <span class="sort-icon">{{ sortIcon('name') }}</span>
           </th>
@@ -14,11 +23,24 @@
           <th>Rate</th>
           <th>Balance</th>
           <th>Deposit</th>
+          <th>&nbsp;</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(user, index) in sortedUsers" :key="index">
-          <td>{{ user.name }}</td>
+          <td>
+            <input type="checkbox" />
+          </td>
+          <td>
+            <b>{{  user.id }}</b>
+          </td>
+          <td>
+            <button>E</button>
+          </td>
+          <td>
+            <span class="name">{{ user.name }}</span>
+            <span class="phone">{{ formatPhone(user.phone) }}</span>
+          </td>
           <td>{{ user.description }}</td>
           <td>
             <span :class="['status-badge', user.status.toLowerCase()]">
@@ -32,14 +54,18 @@
             <sub>CAD</sub>
           </td>
           <td class="currency_type">
-              <div>
-                {{ formatCurrency(user.balance) }}
-              </div>
-              <sub>CAD</sub>
+            <div :class="user.balance < 0? 'negative': 'positive'">
+              {{ formatCurrency(user.balance) }}
+            </div>
+            <sub>CAD</sub>
           </td>
+
           <td class="currency_type">
               <div>{{ formatCurrency(user.deposit) }}</div>
               <sub>CAD</sub>
+          </td>
+          <td>
+            <i class="bi bi-three-dots-vertical"></i>
           </td>
         </tr>
       </tbody>
@@ -48,6 +74,7 @@
 </template>
 
 <script>
+import "bootstrap-icons/font/bootstrap-icons.css";
 export default {
   name: 'UserTable',
   data() {
@@ -55,18 +82,19 @@ export default {
       sortKey: null,
       sortDir: 1,
       users: [
-        { name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'Active', rate: 6.75, balance: 284500, deposit: 15000 },
-        { name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'Pending', rate: 8.25, balance: 52000, deposit: 5000 },
-        { name: 'Carol Smith', description: '15-Year Fixed Mortgage', status: 'Active', rate: 6.10, balance: 198750, deposit: 22000 },
-        { name: 'David Lee', description: 'FHA Purchase Loan', status: 'Closed', rate: 7.00, balance: 0, deposit: 8500 },
-        { name: 'Eva Chen', description: 'VA Home Loan', status: 'Active', rate: 5.90, balance: 312000, deposit: 0 },
-        { name: 'Frank Nguyen', description: 'Jumbo Loan', status: 'Pending', rate: 7.50, balance: 875000, deposit: 50000 },
-        { name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'Active', rate: 6.75, balance: 284500, deposit: 15000 },
-        { name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'Pending', rate: 8.25, balance: 52000, deposit: 5000 },
-        { name: 'Carol Smith', description: '15-Year Fixed Mortgage', status: 'Active', rate: 6.10, balance: 198750, deposit: 22000 },
+        { id: 1, name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'open', rate: 6.75, balance: 284500, deposit: 15000, phone: '5711231234' },
+        { id: 2, name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'pending', rate: 8.25, balance: 52000, deposit: 5000, phone: '8047829834' },
+        { id: 3, name: 'Carol Smith', description: '15-Year Fixed Mortgage', status: 'due', rate: 6.10, balance: -198750, deposit: 22000, phone: '7032781199' },
+        { id: 4, name: 'David Lee', description: 'FHA Purchase Loan', status: 'inactive', rate: 7.00, balance: 0, deposit: 8500, phone: '2040122200' },
+        { id: 5, name: 'Eva Chen', description: 'VA Home Loan', status: 'open', rate: 5.90, balance: 312000, deposit: 0, phone: '7031231234' },
+        { id: 6, name: 'Frank Nguyen', description: 'Jumbo Loan', status: 'pending', rate: 7.50, balance: 875000, deposit: 50000, phone: '4349629988' },
+        { id: 7, name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'open', rate: 6.75, balance: -284500, deposit: 15000, phone: '5712007722' },
+        { id: 8, name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'pending', rate: 8.25, balance: 52000, deposit: 5000, phone: '8881231234' },
+        { id: 9, name: 'Carol Smith', description: '15-Year Fixed Mortgage', status: 'open', rate: 6.10, balance: 198750, deposit: 22000, phone: '5716980022' },
       ],
     };
   },
+
   computed: {
     sortedUsers() {
       if (!this.sortKey) return this.users;
@@ -93,7 +121,19 @@ export default {
       return this.sortDir === 1 ? '↑' : '↓';
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+      // Remove the currency symbol
+      const currencyParts = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).formatToParts(value);
+
+      const formattedCurrency = currencyParts
+        // .filter(part => part.type !== 'blurrency')
+        .map(part => part.value)
+        .join('')
+        .trim();
+
+      return formattedCurrency;
+    },
+    formatPhone(phoneNum) {
+      return phoneNum;
     },
   },
 };
@@ -119,11 +159,6 @@ h1 {
   border-radius: 8px;
   overflow: hidden;
 
-  thead {
-    background-color: #2c3e50;
-    color: #fff;
-  }
-
   th {
     padding: 14px 16px;
     text-align: left;
@@ -144,11 +179,19 @@ h1 {
 
   td.currency_type {
     text-align: right;
+
+    div.positive {
+      color: #0F0;
+    }
+
+    div.negative {
+      color: #F00;
+    }
   }
 
 }
 
-.loan-table th.sortable:hover {
+.user-table th.sortable:hover {
   background-color: #3d5166;
 }
 
@@ -158,20 +201,20 @@ h1 {
   opacity: 0.75;
 }
 
-.loan-table tbody tr {
+.user-table tbody tr {
   border-bottom: 1px solid #e8ecef;
   transition: background-color 0.15s;
 }
 
-.loan-table tbody tr:last-child {
+.user-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.loan-table tbody tr:hover {
+.user-table tbody tr:hover {
   background-color: #f5f7fa;
 }
 
-.loan-table td {
+.user-table td {
   padding: 14px 16px;
   font-size: 0.95rem;
   color: #34495e;
@@ -184,9 +227,14 @@ h1 {
   font-size: 0.8rem;
   font-weight: 600;
 
-  &.active {
-    background-color: #d4edda;
-    color: #155724;
+  &.open {
+    color: rgb(35, 35, 236);
+    background-color: rgb(127, 127, 221);
+  }
+
+  &.inactive {
+    background-color: #EEE;
+    color: #222;
   }
 
   &.pending {
@@ -194,9 +242,9 @@ h1 {
     color: #856404;
   }
 
-  &.closed {
+  &.due {
     background-color: #f8d7da;
-    color: #721c24;
+    color: #be2b3a;
   }
 }
 
