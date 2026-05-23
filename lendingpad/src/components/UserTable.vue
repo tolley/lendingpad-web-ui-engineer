@@ -64,8 +64,30 @@
               <div>{{ formatCurrency(user.deposit) }}</div>
               <sub>CAD</sub>
           </td>
-          <td>
-            <i class="bi bi-three-dots-vertical"></i>
+          <td class="actions-cell">
+            <div class="action-menu-wrapper">
+              <i
+                class="bi bi-three-dots-vertical action-dots"
+                @click.stop="toggleMenu(index)"
+              ></i>
+              <div
+                v-if="openMenuIndex === index"
+                class="action-dropdown"
+              >
+                <button @click.stop="handleAction('view', user)">
+                  <span>Invite Customer</span>
+                  <i class="bi bi-person-plus"></i>
+                </button>
+                <button @click.stop="handleAction('edit', user)">
+                  <span>Send Email</span>
+                  <i class="bi bi-envelope-plus"></i>
+                </button>
+                <button class="cost_details_button" @click.stop="handleAction('archive', user)">
+                  <span>Manage Cost Details</span>
+                  <i class="bi bi-currency-dollar"></i>
+                </button>
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -74,13 +96,21 @@
 </template>
 
 <script>
-import "bootstrap-icons/font/bootstrap-icons.css";
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 export default {
   name: 'UserTable',
+  mounted() {
+    document.addEventListener('click', this.closeMenu);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.closeMenu);
+  },
   data() {
     return {
       sortKey: null,
       sortDir: 1,
+      openMenuIndex: null,
       users: [
         { id: 1, name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'open', rate: 6.75, balance: 284500, deposit: 15000, phone: '5711231234' },
         { id: 2, name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'pending', rate: 8.25, balance: 52000, deposit: 5000, phone: '8047829834' },
@@ -125,7 +155,6 @@ export default {
       const currencyParts = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).formatToParts(value);
 
       const formattedCurrency = currencyParts
-        // .filter(part => part.type !== 'blurrency')
         .map(part => part.value)
         .join('')
         .trim();
@@ -134,6 +163,15 @@ export default {
     },
     formatPhone(phoneNum) {
       return phoneNum;
+    },
+    toggleMenu(index) {
+      this.openMenuIndex = this.openMenuIndex === index ? null : index;
+    },
+    closeMenu() {
+      this.openMenuIndex = null;
+    },
+    handleAction(action, user) {
+      this.closeMenu();
     },
   },
 };
@@ -245,6 +283,82 @@ h1 {
   &.due {
     background-color: #f8d7da;
     color: #be2b3a;
+  }
+}
+
+.actions-cell {
+  position: relative;
+  width: 40px;
+}
+
+.action-menu-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.action-dots {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  color: #666;
+
+  &:hover {
+    background-color: #e8ecef;
+    color: #333;
+  }
+}
+
+.action-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: #fff;
+  border: 1px solid #dde2e8;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 205px;
+  z-index: 100;
+  padding: 6px 0;
+
+  hr {
+    border: none;
+    border-top: 1px solid #e8ecef;
+    margin: 4px 0;
+  }
+
+  button {
+    display: inline;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    text-align: right;
+    font-size: 0.9rem;
+    color: #00F;
+    cursor: pointer;
+
+    span {
+      float: left;
+    }
+
+    &:hover {
+      background-color: #f5f7fa;
+    }
+
+    &.danger {
+      color: #be2b3a;
+
+      &:hover {
+        background-color: #fdf0f1;
+      }
+    }
+
+    &.cost_details_button {
+      color: #0F0;
+    }
   }
 }
 
