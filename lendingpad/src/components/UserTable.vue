@@ -1,9 +1,16 @@
 <template>
   <div class="user-table-container">
-    <div>
-      <button>C</button>
-      <input type="text" value="" />
-      <button>D</button>
+    <div id="user-table-filters">
+      <button>
+        <i class="filter bi bi-funnel-fill"></i>
+      </button>
+      <div class="search-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" placeholder="Search" value="" />
+      </div>
+      <button class="add_new_user">
+        + Add User
+      </button>
     </div>
     <table class="user-table">
       <thead>
@@ -11,7 +18,9 @@
           <th>
             <input type="checkbox" />
           </th>
-          <th>IDs</th>
+          <th @click="sort('id')" class="sortable">
+            Id <span class="sort-icon">{{ sortIcon('id') }}</span>
+          </th>
           <th>edit</th>
           <th @click="sort('name')" class="sortable">
             Name <span class="sort-icon">{{ sortIcon('name') }}</span>
@@ -27,15 +36,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(user, index) in sortedUsers" :key="index">
+        <tr v-for="(user) in paginatedUsers" :key="user.id">
           <td>
             <input type="checkbox" />
           </td>
           <td>
-            <b>{{  user.id }}</b>
+            <b>{{ user.id }}</b>
           </td>
           <td>
-            <button>E</button>
+            <button>
+              <i class="bi bi-pencil-fill"></i>
+            </button>
           </td>
           <td>
             <span class="name">{{ user.name }}</span>
@@ -68,10 +79,10 @@
             <div class="action-menu-wrapper">
               <i
                 class="bi bi-three-dots-vertical action-dots"
-                @click.stop="toggleMenu(index)"
+                @click.stop="toggleMenu(user.id)"
               ></i>
               <div
-                v-if="openMenuIndex === index"
+                v-if="openMenuIndex === user.id"
                 class="action-dropdown"
               >
                 <button @click.stop="handleAction('view', user)">
@@ -92,11 +103,36 @@
         </tr>
       </tbody>
     </table>
+
+    <div class="pagination">
+      <div class="pagination-info">
+        {{ rangeStart }}–{{ rangeEnd }} of {{ sortedUsers.length }} users
+      </div>
+      <div class="pagination-size">
+        <label>Rows per page:
+          <select v-model="pageSize" @change="currentPage = 1">
+            <option :value="5">5</option>
+            <option :value="10">10</option>
+            <option :value="15">15</option>
+            <option :value="20">20</option>
+            <option :value="30">30</option>
+            <option :value="420">40</option>
+            <option :value="50">50</option>
+          </select>
+        </label>
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">‹</button>
+        <span>{{ currentPage + '/' + totalPages }}</span>
+        <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">›</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { users } from '../data/users.js';
 
 export default {
   name: 'UserTable',
@@ -111,30 +147,62 @@ export default {
       sortKey: null,
       sortDir: 1,
       openMenuIndex: null,
-      users: [
-        { id: 1, name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'open', rate: 6.75, balance: 284500, deposit: 15000, phone: '5711231234' },
-        { id: 2, name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'pending', rate: 8.25, balance: 52000, deposit: 5000, phone: '8047829834' },
-        { id: 3, name: 'Carol Smith', description: '15-Year Fixed Mortgage', status: 'due', rate: 6.10, balance: -198750, deposit: 22000, phone: '7032781199' },
-        { id: 4, name: 'David Lee', description: 'FHA Purchase Loan', status: 'inactive', rate: 7.00, balance: 0, deposit: 8500, phone: '2040122200' },
-        { id: 5, name: 'Eva Chen', description: 'VA Home Loan', status: 'open', rate: 5.90, balance: 312000, deposit: 0, phone: '7031231234' },
-        { id: 6, name: 'Frank Nguyen', description: 'Jumbo Loan', status: 'pending', rate: 7.50, balance: 875000, deposit: 50000, phone: '4349629988' },
-        { id: 7, name: 'Alice Johnson', description: '30-Year Fixed Mortgage', status: 'open', rate: 6.75, balance: -284500, deposit: 15000, phone: '5712007722' },
-        { id: 8, name: 'Bob Martinez', description: 'Home Equity Line of Credit', status: 'pending', rate: 8.25, balance: 52000, deposit: 5000, phone: '8881231234' },
-        { id: 9, name: 'Carol Smith', description: '15-Year Fixed Mortgage', status: 'open', rate: 6.10, balance: 198750, deposit: 22000, phone: '5716980022' },
-      ],
+      currentPage: 1,
+      pageSize: 10,
+      users,
     };
   },
 
   computed: {
     sortedUsers() {
-      if (!this.sortKey) return this.users;
-      return [...this.users].sort((a, b) => {
-        const valA = a[this.sortKey].toLowerCase();
-        const valB = b[this.sortKey].toLowerCase();
-        if (valA < valB) return -1 * this.sortDir;
-        if (valA > valB) return 1 * this.sortDir;
-        return 0;
-      });
+      if( ! this.sortKey )
+        return this.users;
+      
+      // Need to sort the Id's by their numeric value
+      if( this.sortKey == 'id' ) {
+        return [...this.users].sort((a, b) => {
+          const valA = parseInt(a[this.sortKey]);
+          const valB = parseInt(b[this.sortKey]);
+          if (valA < valB) return -1 * this.sortDir;
+          if (valA > valB) return 1 * this.sortDir;
+          return 0;
+        });
+      } else {
+        return [...this.users].sort((a, b) => {
+          const valA = String(a[this.sortKey]).toLowerCase();
+          const valB = String(b[this.sortKey]).toLowerCase();
+          if (valA < valB) return -1 * this.sortDir;
+          if (valA > valB) return 1 * this.sortDir;
+          return 0;
+        });
+      }
+    },
+    totalPages() {
+      return Math.ceil(this.sortedUsers.length / this.pageSize);
+    },
+    rangeStart() {
+      return (this.currentPage - 1) * this.pageSize + 1;
+    },
+    rangeEnd() {
+      return Math.min(this.currentPage * this.pageSize, this.sortedUsers.length);
+    },
+    paginatedUsers() {
+      return this.sortedUsers.slice(this.rangeStart - 1, this.rangeEnd);
+    },
+    visiblePages() {
+      const pages = [];
+      const total = this.totalPages;
+      const cur = this.currentPage;
+      if (total <= 7) {
+        for (let i = 1; i <= total; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        if (cur > 3) pages.push('…');
+        for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
+        if (cur < total - 2) pages.push('…');
+        pages.push(total);
+      }
+      return pages;
     },
   },
   methods: {
@@ -145,6 +213,7 @@ export default {
         this.sortKey = key;
         this.sortDir = 1;
       }
+      this.currentPage = 1;
     },
     sortIcon(key) {
       if (this.sortKey !== key) return '⇅';
@@ -230,7 +299,7 @@ h1 {
 }
 
 .user-table th.sortable:hover {
-  background-color: #3d5166;
+  background-color: #708aa7;
 }
 
 .sort-icon {
@@ -309,6 +378,24 @@ h1 {
   }
 }
 
+.search-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 8px;
+  color: #888;
+  pointer-events: none;
+  font-size: 0.9rem;
+}
+
+.search-wrapper input {
+  padding-left: 28px;
+}
+
 .action-dropdown {
   position: absolute;
   right: 0;
@@ -359,6 +446,85 @@ h1 {
     &.cost_details_button {
       color: #0F0;
     }
+  }
+}
+
+div#user-table-filters {
+  text-align: left;
+
+  button.add_new_user {
+    float: right;
+    background-color: #00F;
+    padding: 5px;
+    border-radius: 5px;
+    color: #fff;
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: #555;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.page-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #dde2e8;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: #34495e;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled):not(.ellipsis) {
+    background: #f0f4ff;
+    border-color: #00F;
+    color: #00F;
+  }
+
+  &.active {
+    background: #00F;
+    color: #fff;
+    border-color: #00F;
+    font-weight: 600;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &.ellipsis {
+    border: none;
+    background: none;
+    cursor: default;
+  }
+}
+
+.pagination-size label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  select {
+    border: 1px solid #dde2e8;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 0.88rem;
+    cursor: pointer;
   }
 }
 
