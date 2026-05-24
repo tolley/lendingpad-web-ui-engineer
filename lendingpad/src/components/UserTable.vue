@@ -8,7 +8,7 @@
         <i class="bi bi-search search-icon"></i>
         <input type="text" placeholder="Search" v-model="searchQuery" />
       </div>
-      <button class="add_new_user">
+      <button class="add_new_user" @click="openAddUserModal">
         + Add User
       </button>
     </div>
@@ -104,6 +104,54 @@
       </tbody>
     </table>
 
+    <!-- Add User Modal -->
+    <div v-if="showAddUserModal" class="modal-overlay" @click.self="closeAddUserModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Add New User</h2>
+          <button class="modal-close" @click="closeAddUserModal"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form class="modal-form" @submit.prevent="submitNewUser">
+          <div class="form-row">
+            <label>Name
+              <input v-model="newUser.name" type="text" required placeholder="Full name" />
+            </label>
+            <label>Phone
+              <input v-model="newUser.phone" type="tel" placeholder="10-digit phone" />
+            </label>
+          </div>
+          <label>Description
+            <input v-model="newUser.description" type="text" placeholder="Loan type or description" />
+          </label>
+          <div class="form-row">
+            <label>Status
+              <select v-model="newUser.status" required>
+                <option value="open">Open</option>
+                <option value="pending">Pending</option>
+                <option value="due">Due</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </label>
+            <label>Rate (%)
+              <input v-model.number="newUser.rate" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Balance
+              <input v-model.number="newUser.balance" type="number" step="0.01" placeholder="0.00" />
+            </label>
+            <label>Deposit
+              <input v-model.number="newUser.deposit" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" @click="closeAddUserModal">Cancel</button>
+            <button type="submit" class="btn-submit">Add User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div class="pagination">
       <div class="pagination-info">
         {{ rangeStart }}–{{ rangeEnd }} of {{ sortedUsers.length }} users
@@ -152,6 +200,8 @@ export default {
       searchQuery: '',
       activeSearch: '',
       users,
+      showAddUserModal: false,
+      newUser: { name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 },
     };
   },
 
@@ -252,6 +302,18 @@ export default {
     },
     handleAction(action, user) {
       this.closeMenu();
+    },
+    openAddUserModal() {
+      this.newUser = { name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 };
+      this.showAddUserModal = true;
+    },
+    closeAddUserModal() {
+      this.showAddUserModal = false;
+    },
+    submitNewUser() {
+      const nextId = this.users.length > 0 ? Math.max(...this.users.map(u => parseInt(u.id))) + 1 : 1;
+      this.users.push({ ...this.newUser, id: nextId });
+      this.closeAddUserModal();
     },
   },
 };
@@ -523,6 +585,122 @@ div#user-table-filters {
     border: none;
     background: none;
     cursor: default;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  width: 520px;
+  max-width: 95vw;
+  padding: 28px 32px 24px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #888;
+
+    &:hover {
+      color: #333;
+    }
+  }
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    flex: 1;
+
+    input, select {
+      padding: 8px 10px;
+      border: 1px solid #dde2e8;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: #34495e;
+      outline: none;
+
+      &:focus {
+        border-color: #00F;
+        box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.1);
+      }
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+
+  .btn-cancel {
+    padding: 8px 18px;
+    border: 1px solid #dde2e8;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #555;
+
+    &:hover {
+      background: #f5f7fa;
+    }
+  }
+
+  .btn-submit {
+    padding: 8px 18px;
+    background: #00F;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    &:hover {
+      background: #0000cc;
+    }
   }
 }
 
