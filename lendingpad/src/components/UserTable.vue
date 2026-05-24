@@ -1,12 +1,12 @@
 <template>
   <div class="user-table-container">
     <div id="user-table-filters">
-      <button>
+      <button id="user-filter-button" @click="applyFilter">
         <i class="filter bi bi-funnel-fill"></i>
       </button>
       <div class="search-wrapper">
         <i class="bi bi-search search-icon"></i>
-        <input type="text" placeholder="Search" value="" />
+        <input type="text" placeholder="Search" v-model="searchQuery" />
       </div>
       <button class="add_new_user">
         + Add User
@@ -149,18 +149,25 @@ export default {
       openMenuIndex: null,
       currentPage: 1,
       pageSize: 10,
+      searchQuery: '',
+      activeSearch: '',
       users,
     };
   },
 
   computed: {
+    filteredUsers() {
+      const q = this.activeSearch.trim().toLowerCase();
+      if (!q) return this.users;
+      return this.users.filter(u => u.name.toLowerCase().includes(q));
+    },
     sortedUsers() {
       if( ! this.sortKey )
-        return this.users;
-      
+        return this.filteredUsers;
+
       // Need to sort the Id's by their numeric value
       if( this.sortKey == 'id' ) {
-        return [...this.users].sort((a, b) => {
+        return [...this.filteredUsers].sort((a, b) => {
           const valA = parseInt(a[this.sortKey]);
           const valB = parseInt(b[this.sortKey]);
           if (valA < valB) return -1 * this.sortDir;
@@ -168,7 +175,7 @@ export default {
           return 0;
         });
       } else {
-        return [...this.users].sort((a, b) => {
+        return [...this.filteredUsers].sort((a, b) => {
           const valA = String(a[this.sortKey]).toLowerCase();
           const valB = String(b[this.sortKey]).toLowerCase();
           if (valA < valB) return -1 * this.sortDir;
@@ -206,6 +213,10 @@ export default {
     },
   },
   methods: {
+    applyFilter() {
+      this.activeSearch = this.searchQuery;
+      this.currentPage = 1;
+    },
     sort(key) {
       if (this.sortKey === key) {
         this.sortDir *= -1;
@@ -329,10 +340,11 @@ h1 {
 
 .status-badge {
   display: inline-block;
-  padding: 3px 10px;
+  padding: 6px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 600;
+  text-transform: capitalize;
 
   &.open {
     color: rgb(35, 35, 236);
