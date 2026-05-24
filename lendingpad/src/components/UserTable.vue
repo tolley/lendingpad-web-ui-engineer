@@ -1,12 +1,12 @@
 <template>
   <div class="user-table-container">
     <div id="user-table-filters">
-      <button id="user-filter-button" @click="applyFilter">
-        <i class="filter bi bi-funnel-fill"></i>
+      <button id="user-filter-button" @click="applyFilter" aria-label="Apply filter">
+        <i class="filter bi bi-funnel-fill" aria-hidden="true"></i>
       </button>
       <div class="search-wrapper">
-        <i class="bi bi-search search-icon"></i>
-        <input type="text" placeholder="Search" v-model="searchQuery" />
+        <i class="bi bi-search search-icon" aria-hidden="true"></i>
+        <input type="text" placeholder="Search" v-model="searchQuery" aria-label="Search users" />
       </div>
       <button class="add_new_user" @click="openAddUserModal">
         + Add User
@@ -16,18 +16,18 @@
       <thead>
         <tr>
           <th>
-            <input type="checkbox" />
+            <input type="checkbox" aria-label="Select all users" />
           </th>
-          <th @click="sort('id')" class="sortable">
-            Id <span class="sort-icon">{{ sortIcon('id') }}</span>
+          <th @click="sort('id')" class="sortable" :aria-sort="sortKey === 'id' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+            Id <span class="sort-icon" aria-hidden="true">{{ sortIcon('id') }}</span>
           </th>
           <th>edit</th>
-          <th @click="sort('name')" class="sortable">
-            Name <span class="sort-icon">{{ sortIcon('name') }}</span>
+          <th @click="sort('name')" class="sortable" :aria-sort="sortKey === 'name' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+            Name <span class="sort-icon" aria-hidden="true">{{ sortIcon('name') }}</span>
           </th>
           <th>Description</th>
-          <th @click="sort('status')" class="sortable">
-            Status <span class="sort-icon">{{ sortIcon('status') }}</span>
+          <th @click="sort('status')" class="sortable" :aria-sort="sortKey === 'status' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+            Status <span class="sort-icon" aria-hidden="true">{{ sortIcon('status') }}</span>
           </th>
           <th>Rate</th>
           <th>Balance</th>
@@ -38,14 +38,14 @@
       <tbody>
         <tr v-for="(user) in paginatedUsers" :key="user.id">
           <td>
-            <input type="checkbox" />
+            <input type="checkbox" :aria-label="`Select ${user.name}`" />
           </td>
           <td>
             <b>{{ user.id }}</b>
           </td>
           <td>
-            <button class="edit_user" @click="openEditUserModal(user)">
-              <i class="bi bi-pencil-fill"></i>
+            <button class="edit_user" @click="openEditUserModal(user)" :aria-label="`Edit ${user.name}`">
+              <i class="bi bi-pencil-fill" aria-hidden="true"></i>
             </button>
           </td>
           <td>
@@ -80,22 +80,28 @@
               <i
                 class="bi bi-three-dots-vertical action-dots"
                 @click.stop="toggleMenu(user.id)"
+                role="button"
+                tabindex="0"
+                :aria-label="`Actions for ${user.name}`"
+                :aria-expanded="openMenuIndex === user.id"
+                aria-haspopup="true"
               ></i>
               <div
                 v-if="openMenuIndex === user.id"
                 class="action-dropdown"
+                role="menu"
               >
-                <button @click.stop="handleAction('view', user)">
+                <button @click.stop="handleAction('view', user)" role="menuitem" :aria-label="`Invite ${user.name} as customer`">
                   <span>Invite Customer</span>
-                  <i class="bi bi-person-plus"></i>
+                  <i class="bi bi-person-plus" aria-hidden="true"></i>
                 </button>
-                <button @click.stop="handleAction('edit', user)">
+                <button @click.stop="handleAction('edit', user)" role="menuitem" :aria-label="`Send email to ${user.name}`">
                   <span>Send Email</span>
-                  <i class="bi bi-envelope-plus"></i>
+                  <i class="bi bi-envelope-plus" aria-hidden="true"></i>
                 </button>
-                <button class="cost_details_button" @click.stop="handleAction('archive', user)">
+                <button class="cost_details_button" @click.stop="handleAction('archive', user)" role="menuitem" :aria-label="`Manage cost details for ${user.name}`">
                   <span>Manage Cost Details</span>
-                  <i class="bi bi-currency-dollar"></i>
+                  <i class="bi bi-currency-dollar" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -105,16 +111,16 @@
     </table>
 
     <!-- Add User Modal -->
-    <div v-if="showAddUserModal" class="modal-overlay" @click.self="closeAddUserModal">
+    <div v-if="showAddUserModal" class="modal-overlay" @click.self="closeAddUserModal" role="dialog" aria-modal="true" aria-labelledby="add-user-dialog-title">
       <div class="modal">
         <div class="modal-header">
-          <h2>Add New User</h2>
-          <button class="modal-close" @click="closeAddUserModal"><i class="bi bi-x-lg"></i></button>
+          <h2 id="add-user-dialog-title">Add New User</h2>
+          <button class="modal-close" @click="closeAddUserModal" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
         <form class="modal-form" @submit.prevent="submitNewUser">
           <div class="form-row">
             <label>Name
-              <input v-model="newUser.name" type="text" required placeholder="Full name" />
+              <input v-model="newUser.name" type="text" required aria-required="true" placeholder="Full name" />
             </label>
             <label>Phone
               <input v-model="newUser.phone" type="tel" placeholder="10-digit phone" />
@@ -125,7 +131,7 @@
           </label>
           <div class="form-row">
             <label>Status
-              <select v-model="newUser.status" required>
+              <select v-model="newUser.status" required aria-required="true">
                 <option value="open">Open</option>
                 <option value="pending">Pending</option>
                 <option value="due">Due</option>
@@ -153,16 +159,16 @@
     </div>
 
     <!-- Edit User Modal -->
-    <div v-if="showEditUserModal" class="modal-overlay" @click.self="closeEditUserModal">
+    <div v-if="showEditUserModal" class="modal-overlay" @click.self="closeEditUserModal" role="dialog" aria-modal="true" aria-labelledby="edit-user-dialog-title">
       <div class="modal">
         <div class="modal-header">
-          <h2>Edit User</h2>
-          <button class="modal-close" @click="closeEditUserModal"><i class="bi bi-x-lg"></i></button>
+          <h2 id="edit-user-dialog-title">Edit User</h2>
+          <button class="modal-close" @click="closeEditUserModal" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
         <form class="modal-form" @submit.prevent="submitEditUser">
           <div class="form-row">
             <label>Name
-              <input v-model="editUser.name" type="text" required placeholder="Full name" />
+              <input v-model="editUser.name" type="text" required aria-required="true" placeholder="Full name" />
             </label>
             <label>Phone
               <input v-model="editUser.phone" type="tel" placeholder="10-digit phone" />
@@ -173,7 +179,7 @@
           </label>
           <div class="form-row">
             <label>Status
-              <select v-model="editUser.status" required>
+              <select v-model="editUser.status" required aria-required="true">
                 <option value="open">Open</option>
                 <option value="pending">Pending</option>
                 <option value="due">Due</option>
@@ -200,13 +206,13 @@
       </div>
     </div>
 
-    <div class="pagination">
-      <div class="pagination-info">
+    <nav class="pagination" aria-label="Table pagination">
+      <div class="pagination-info" aria-live="polite" aria-atomic="true">
         {{ rangeStart }}–{{ rangeEnd }} of {{ sortedUsers.length }} users
       </div>
       <div class="pagination-size">
         <label>Rows per page:
-          <select v-model="pageSize" @change="currentPage = 1">
+          <select v-model="pageSize" @change="currentPage = 1" aria-label="Rows per page">
             <option :value="5">5</option>
             <option :value="10">10</option>
             <option :value="15">15</option>
@@ -218,11 +224,11 @@
         </label>
       </div>
       <div class="pagination-controls">
-        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">‹</button>
-        <span>{{ currentPage + '/' + totalPages }}</span>
-        <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">›</button>
+        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--" aria-label="Previous page">‹</button>
+        <span aria-live="polite">{{ currentPage + '/' + totalPages }}</span>
+        <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++" aria-label="Next page">›</button>
       </div>
-    </div>
+    </nav>
   </div>
 </template>
 
