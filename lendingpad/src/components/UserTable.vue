@@ -44,7 +44,7 @@
             <b>{{ user.id }}</b>
           </td>
           <td>
-            <button>
+            <button class="edit_user" @click="openEditUserModal(user)">
               <i class="bi bi-pencil-fill"></i>
             </button>
           </td>
@@ -152,6 +152,54 @@
       </div>
     </div>
 
+    <!-- Edit User Modal -->
+    <div v-if="showEditUserModal" class="modal-overlay" @click.self="closeEditUserModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Edit User</h2>
+          <button class="modal-close" @click="closeEditUserModal"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form class="modal-form" @submit.prevent="submitEditUser">
+          <div class="form-row">
+            <label>Name
+              <input v-model="editUser.name" type="text" required placeholder="Full name" />
+            </label>
+            <label>Phone
+              <input v-model="editUser.phone" type="tel" placeholder="10-digit phone" />
+            </label>
+          </div>
+          <label>Description
+            <input v-model="editUser.description" type="text" placeholder="Loan type or description" />
+          </label>
+          <div class="form-row">
+            <label>Status
+              <select v-model="editUser.status" required>
+                <option value="open">Open</option>
+                <option value="pending">Pending</option>
+                <option value="due">Due</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </label>
+            <label>Rate (%)
+              <input v-model.number="editUser.rate" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Balance
+              <input v-model.number="editUser.balance" type="number" step="0.01" placeholder="0.00" />
+            </label>
+            <label>Deposit
+              <input v-model.number="editUser.deposit" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" @click="closeEditUserModal">Cancel</button>
+            <button type="submit" class="btn-submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div class="pagination">
       <div class="pagination-info">
         {{ rangeStart }}–{{ rangeEnd }} of {{ sortedUsers.length }} users
@@ -202,6 +250,8 @@ export default {
       users,
       showAddUserModal: false,
       newUser: { name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 },
+      showEditUserModal: false,
+      editUser: { id: null, name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 },
     };
   },
 
@@ -314,6 +364,18 @@ export default {
       const nextId = this.users.length > 0 ? Math.max(...this.users.map(u => parseInt(u.id))) + 1 : 1;
       this.users.push({ ...this.newUser, id: nextId });
       this.closeAddUserModal();
+    },
+    openEditUserModal(user) {
+      this.editUser = { ...user };
+      this.showEditUserModal = true;
+    },
+    closeEditUserModal() {
+      this.showEditUserModal = false;
+    },
+    submitEditUser() {
+      const idx = this.users.findIndex(u => u.id === this.editUser.id);
+      if (idx !== -1) this.users.splice(idx, 1, { ...this.editUser });
+      this.closeEditUserModal();
     },
   },
 };
