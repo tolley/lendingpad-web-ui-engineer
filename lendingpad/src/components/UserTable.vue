@@ -53,8 +53,8 @@
             </button>
           </td>
           <td>
-            <span class="name">{{ user.name }}</span>
-            <span class="phone">{{ formatPhone(user.phone) }}</span>
+            <span class="spn_name">{{ user.name }}</span>
+            <span class="spn_phone">{{ formatPhone(user.phone) }}</span>
           </td>
           <td :title="user.description" :aria-label="user.description">{{ user.description.slice(0, 50) }}{{ user.description.length > 50 ? '…' : '' }}</td>
           <td>
@@ -346,11 +346,21 @@ h1 {
     text-align: right;
 
     div.positive {
-      color: #0F0;
+      color: rgb( 2, 153, 2;)
     }
 
     div.negative {
-      color: #F00;
+      color: rgb(153, 2, 2);
+    }
+  }
+
+  td {
+    span.spn_phone {
+      color: #999;
+    }
+
+    span.spn_name {
+      color: #000;
     }
   }
 
@@ -377,6 +387,8 @@ h1 {
 
 .user-table tbody tr:hover {
   background-color: #f5f7fa;
+  outline: 2px solid #3d70d2;
+  outline-offset: -2px;
 }
 
 .user-table td {
