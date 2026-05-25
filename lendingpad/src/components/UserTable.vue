@@ -21,14 +21,15 @@
             <input type="checkbox" aria-label="Select all users" />
           </th>
           <th @click="sort('id')" class="sortable" :aria-sort="sortKey === 'id' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
-            Id <span class="sort-icon" aria-hidden="true">{{ sortIcon('id') }}</span>
+            Id <span class="sort-icon" aria-hidden="true">{{ sortIcon('id') }}
+            </span>
           </th>
           <th></th>
           <th @click="sort('name')" class="sortable" :aria-sort="sortKey === 'name' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
             Name <span class="sort-icon" aria-hidden="true">{{ sortIcon('name') }}</span>
           </th>
           <th>Description</th>
-          <th @click="sort('status')" class="sortable" :aria-sort="sortKey === 'status' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+          <th @click="sort('status')" class="sortable status" :aria-sort="sortKey === 'status' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
             Status <span class="sort-icon" aria-hidden="true">{{ sortIcon('status') }}</span>
           </th>
           <th>Rate</th>
@@ -113,101 +114,8 @@
       </tbody>
     </table>
 
-    <!-- Add User Modal -->
-    <div v-if="showAddUserModal" class="modal-overlay" @click.self="closeAddUserModal" role="dialog" aria-modal="true" aria-labelledby="add-user-dialog-title">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 id="add-user-dialog-title">Add New User</h2>
-          <button class="modal-close" @click="closeAddUserModal" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-        </div>
-        <form class="modal-form" @submit.prevent="submitNewUser">
-          <div class="form-row">
-            <label>Name
-              <input v-model="newUser.name" type="text" required aria-required="true" placeholder="Full name" />
-            </label>
-            <label>Phone
-              <input v-model="newUser.phone" type="tel" placeholder="10-digit phone" />
-            </label>
-          </div>
-          <label>Description
-            <input v-model="newUser.description" type="text" placeholder="Loan type or description" />
-          </label>
-          <div class="form-row">
-            <label>Status
-              <select v-model="newUser.status" required aria-required="true">
-                <option value="open">Open</option>
-                <option value="pending">Pending</option>
-                <option value="due">Due</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </label>
-            <label>Rate (%)
-              <input v-model.number="newUser.rate" type="number" step="0.01" min="0" placeholder="0.00" />
-            </label>
-          </div>
-          <div class="form-row">
-            <label>Balance
-              <input v-model.number="newUser.balance" type="number" step="0.01" placeholder="0.00" />
-            </label>
-            <label>Deposit
-              <input v-model.number="newUser.deposit" type="number" step="0.01" min="0" placeholder="0.00" />
-            </label>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-cancel" @click="closeAddUserModal">Cancel</button>
-            <button type="submit" class="btn-submit">Add User</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Edit User Modal -->
-    <div v-if="showEditUserModal" class="modal-overlay" @click.self="closeEditUserModal" role="dialog" aria-modal="true" aria-labelledby="edit-user-dialog-title">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 id="edit-user-dialog-title">Edit User</h2>
-          <button class="modal-close" @click="closeEditUserModal" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-        </div>
-        <form class="modal-form" @submit.prevent="submitEditUser">
-          <div class="form-row">
-            <label>Name
-              <input v-model="editUser.name" type="text" required aria-required="true" placeholder="Full name" />
-            </label>
-            <label>Phone
-              <input v-model="editUser.phone" type="tel" placeholder="10-digit phone" />
-            </label>
-          </div>
-          <label>Description
-            <input v-model="editUser.description" type="text" placeholder="Loan type or description" />
-          </label>
-          <div class="form-row">
-            <label>Status
-              <select v-model="editUser.status" required aria-required="true">
-                <option value="open">Open</option>
-                <option value="pending">Pending</option>
-                <option value="due">Due</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </label>
-            <label>Rate (%)
-              <input v-model.number="editUser.rate" type="number" step="0.01" min="0" placeholder="0.00" />
-            </label>
-          </div>
-          <div class="form-row">
-            <label>Balance
-              <input v-model.number="editUser.balance" type="number" step="0.01" placeholder="0.00" />
-            </label>
-            <label>Deposit
-              <input v-model.number="editUser.deposit" type="number" step="0.01" min="0" placeholder="0.00" />
-            </label>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-cancel" @click="closeEditUserModal">Cancel</button>
-            <button type="submit" class="btn-submit">Save Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <AddUser :show="showAddUserModal" @close="closeAddUserModal" @submit="submitNewUser" />
+    <EditUser :show="showEditUserModal" :user="editUser" @close="closeEditUserModal" @submit="submitEditUser" />
 
     <nav class="pagination" aria-label="Table pagination">
       <div class="pagination-info" aria-live="polite" aria-atomic="true">
@@ -238,9 +146,12 @@
 <script>
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { users } from '../data/users.js';
+import AddUser from './AddUser.vue';
+import EditUser from './EditUser.vue';
 
 export default {
   name: 'UserTable',
+  components: { AddUser, EditUser },
   mounted() {
     document.addEventListener('click', this.closeMenu);
   },
@@ -258,9 +169,8 @@ export default {
       activeSearch: '',
       users,
       showAddUserModal: false,
-      newUser: { name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 },
       showEditUserModal: false,
-      editUser: { id: null, name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 },
+      editUser: null,
     };
   },
 
@@ -363,15 +273,14 @@ export default {
       this.closeMenu();
     },
     openAddUserModal() {
-      this.newUser = { name: '', phone: '', description: '', status: 'open', rate: 0, balance: 0, deposit: 0 };
       this.showAddUserModal = true;
     },
     closeAddUserModal() {
       this.showAddUserModal = false;
     },
-    submitNewUser() {
+    submitNewUser(userData) {
       const nextId = this.users.length > 0 ? Math.max(...this.users.map(u => parseInt(u.id))) + 1 : 1;
-      this.users.push({ ...this.newUser, id: nextId });
+      this.users.push({ ...userData, id: nextId });
       this.closeAddUserModal();
     },
     openEditUserModal(user) {
@@ -381,9 +290,9 @@ export default {
     closeEditUserModal() {
       this.showEditUserModal = false;
     },
-    submitEditUser() {
-      const idx = this.users.findIndex(u => u.id === this.editUser.id);
-      if (idx !== -1) this.users.splice(idx, 1, { ...this.editUser });
+    submitEditUser(userData) {
+      const idx = this.users.findIndex(u => u.id === userData.id);
+      if (idx !== -1) this.users.splice(idx, 1, { ...userData });
       this.closeEditUserModal();
     },
   },
@@ -417,6 +326,11 @@ h1 {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    min-width: 40px;
+
+    &.status {
+      min-width: 90px;
+    }
 
     &.sortable {
       cursor: pointer;
@@ -665,122 +579,6 @@ div#user-table-filters {
     border: none;
     background: none;
     cursor: default;
-  }
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-}
-
-.modal {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-  width: 520px;
-  max-width: 95vw;
-  padding: 28px 32px 24px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-
-  h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0;
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    color: #888;
-
-    &:hover {
-      color: #333;
-    }
-  }
-}
-
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #555;
-    flex: 1;
-
-    input, select {
-      padding: 8px 10px;
-      border: 1px solid #dde2e8;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      color: #34495e;
-      outline: none;
-
-      &:focus {
-        border-color: #00F;
-        box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.1);
-      }
-    }
-  }
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
-
-  .btn-cancel {
-    padding: 8px 18px;
-    border: 1px solid #dde2e8;
-    background: #fff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #555;
-
-    &:hover {
-      background: #f5f7fa;
-    }
-  }
-
-  .btn-submit {
-    padding: 8px 18px;
-    background: #3d70d2;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-
-    &:hover {
-      background: #0000cc;
-    }
   }
 }
 
