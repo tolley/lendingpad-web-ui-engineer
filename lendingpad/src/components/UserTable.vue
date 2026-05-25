@@ -9,9 +9,11 @@
         <input type="text" placeholder="Search" v-model="searchQuery" aria-label="Search users" />
       </div>
       <button class="add_new_user" @click="openAddUserModal">
-        + Add User
+        <i class="filter bi bi-plus-lg" aria-hidden="true"></i>
+        Add User
       </button>
     </div>
+
     <table class="user-table">
       <thead>
         <tr>
@@ -21,7 +23,7 @@
           <th @click="sort('id')" class="sortable" :aria-sort="sortKey === 'id' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
             Id <span class="sort-icon" aria-hidden="true">{{ sortIcon('id') }}</span>
           </th>
-          <th>edit</th>
+          <th></th>
           <th @click="sort('name')" class="sortable" :aria-sort="sortKey === 'name' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
             Name <span class="sort-icon" aria-hidden="true">{{ sortIcon('name') }}</span>
           </th>
@@ -44,7 +46,8 @@
             <b>{{ user.id }}</b>
           </td>
           <td>
-            <button class="edit_user" @click="openEditUserModal(user)" :aria-label="`Edit ${user.name}`">
+            <button class="edit_user" @click="openEditUserModal(user)" 
+                    :aria-label="`Edit ${user.name}`">
               <i class="bi bi-pencil-fill" aria-hidden="true"></i>
             </button>
           </td>
@@ -52,7 +55,7 @@
             <span class="name">{{ user.name }}</span>
             <span class="phone">{{ formatPhone(user.phone) }}</span>
           </td>
-          <td>{{ user.description }}</td>
+          <td :title="user.description" :aria-label="user.description">{{ user.description.slice(0, 50) }}{{ user.description.length > 50 ? '…' : '' }}</td>
           <td>
             <span :class="['status-badge', user.status.toLowerCase()]">
               {{ user.status }}
@@ -596,10 +599,15 @@ div#user-table-filters {
 
   button.add_new_user {
     float: right;
-    background-color: #00F;
+    background-color: #3d70d2;
     padding: 5px;
-    border-radius: 5px;
+    border-radius: 10px;
     color: #fff;
+    cursor: pointer;
+  }
+
+  button#user-filter-button {
+    cursor: pointer;
   }
 }
 
@@ -617,6 +625,10 @@ div#user-table-filters {
 .pagination-controls {
   display: flex;
   gap: 4px;
+
+  span {
+    margin-top: 10px;
+  }
 }
 
 .page-btn {
@@ -758,7 +770,7 @@ div#user-table-filters {
 
   .btn-submit {
     padding: 8px 18px;
-    background: #00F;
+    background: #3d70d2;
     color: #fff;
     border: none;
     border-radius: 6px;
