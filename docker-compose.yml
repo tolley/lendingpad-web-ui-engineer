@@ -1,0 +1,7 @@
+services:
+  lendingpad:
+    build:
+      context: ./lendingpad
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
