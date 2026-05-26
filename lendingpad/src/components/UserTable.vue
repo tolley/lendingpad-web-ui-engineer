@@ -14,72 +14,70 @@
       </button>
     </div>
 
-    <table class="user-table">
-      <thead>
-        <tr>
-          <th>
+    <div class="user-table" role="table" aria-label="Users">
+      <div class="user-table-header" role="rowgroup">
+        <div class="user-table-row header-row" role="row">
+          <div class="col col-check" role="columnheader">
             <input type="checkbox" aria-label="Select all users" />
-          </th>
-          <th @click="sort('id')" class="sortable" :aria-sort="sortKey === 'id' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
-            Id <span class="sort-icon" aria-hidden="true">{{ sortIcon('id') }}
-            </span>
-          </th>
-          <th></th>
-          <th @click="sort('name')" class="sortable" :aria-sort="sortKey === 'name' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+          </div>
+          <div class="col col-id sortable" role="columnheader" @click="sort('id')" :aria-sort="sortKey === 'id' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+            #&nbsp;<span class="sort-icon" aria-hidden="true">{{ sortIcon('id') }}</span>
+          </div>
+          <div class="col col-edit" role="columnheader"></div>
+          <div class="col col-name sortable" role="columnheader" @click="sort('name')" :aria-sort="sortKey === 'name' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
             Name <span class="sort-icon" aria-hidden="true">{{ sortIcon('name') }}</span>
-          </th>
-          <th>Description</th>
-          <th @click="sort('status')" class="sortable status" :aria-sort="sortKey === 'status' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
+          </div>
+          <div class="col col-desc" role="columnheader">Description</div>
+          <div class="col col-status sortable" role="columnheader" @click="sort('status')" :aria-sort="sortKey === 'status' ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'">
             Status <span class="sort-icon" aria-hidden="true">{{ sortIcon('status') }}</span>
-          </th>
-          <th>Rate</th>
-          <th>Balance</th>
-          <th>Deposit</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(user) in paginatedUsers" :key="user.id">
-          <td>
+          </div>
+          <div class="col col-rate" role="columnheader">Rate</div>
+          <div class="col col-balance" role="columnheader">Balance</div>
+          <div class="col col-deposit" role="columnheader">Deposit</div>
+          <div class="col col-actions" role="columnheader">&nbsp;</div>
+        </div>
+      </div>
+      <div class="user-table-body" role="rowgroup">
+        <div class="user-table-row" v-for="(user) in paginatedUsers" :key="user.id" role="row">
+          <div class="col col-check" role="cell">
             <input type="checkbox" :aria-label="`Select ${user.name}`" />
-          </td>
-          <td>
+          </div>
+          <div class="col col-id" role="cell">
             <b>{{ user.id }}</b>
-          </td>
-          <td>
-            <button class="edit_user" @click="openEditUserModal(user)" 
-                    :aria-label="`Edit ${user.name}`">
+          </div>
+          <div class="col col-edit" role="cell">
+            <button class="edit_user" @click="openEditUserModal(user)" :aria-label="`Edit ${user.name}`">
               <i class="bi bi-pencil-fill" aria-hidden="true"></i>
             </button>
-          </td>
-          <td>
+          </div>
+          <div class="col col-name td_namephone" role="cell">
             <span class="spn_name">{{ user.name }}</span>
+            <br />
             <span class="spn_phone">{{ formatPhone(user.phone) }}</span>
-          </td>
-          <td :title="user.description" :aria-label="user.description">{{ user.description.slice(0, 50) }}{{ user.description.length > 50 ? '…' : '' }}</td>
-          <td>
+          </div>
+          <div class="col col-desc" role="cell" :title="user.description" :aria-label="user.description">
+            {{ user.description.slice(0, 50) }}{{ user.description.length > 50 ? '…' : '' }}
+          </div>
+          <div class="col col-status" role="cell">
             <span :class="['status-badge', user.status.toLowerCase()]">
               {{ user.status }}
             </span>
-          </td>
-          <td class="currency_type">
-            <div>
-              {{ formatCurrency(user.rate) }}
-            </div>
+          </div>
+          <div class="col col-rate currency_type" role="cell">
+            <div>{{ formatCurrency(user.rate) }}</div>
             <sub>CAD</sub>
-          </td>
-          <td class="currency_type">
-            <div :class="user.balance < 0? 'negative': 'positive'">
+          </div>
+          <div class="col col-balance currency_type" role="cell">
+            <div :class="user.balance < 0 ? 'negative' : 'positive'">
               {{ formatCurrency(user.balance) }}
             </div>
             <sub>CAD</sub>
-          </td>
-
-          <td class="currency_type">
-              <div>{{ formatCurrency(user.deposit) }}</div>
-              <sub>CAD</sub>
-          </td>
-          <td class="actions-cell">
+          </div>
+          <div class="col col-deposit currency_type" role="cell">
+            <div>{{ formatCurrency(user.deposit) }}</div>
+            <sub>CAD</sub>
+          </div>
+          <div class="col col-actions actions-cell" role="cell">
             <div class="action-menu-wrapper">
               <i
                 class="bi bi-three-dots-vertical action-dots"
@@ -109,10 +107,10 @@
                 </button>
               </div>
             </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <AddUser :show="showAddUserModal" @close="closeAddUserModal" @submit="submitNewUser" />
     <EditUser :show="showEditUserModal" :user="editUser" @close="closeEditUserModal" @submit="submitEditUser" />
@@ -301,9 +299,12 @@ export default {
 
 <style scoped>
 .user-table-container {
-  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  font-family: Inter;
+  overflow: scroll;
+  font-size: 12px;
+  overflow: scroll;
 }
 
 h1 {
@@ -313,40 +314,73 @@ h1 {
 }
 
 .user-table {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  border-collapse: collapse;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  overflow: scroll;
+  overflow: hidden;
+  font-family: Inter;
+}
 
-  th {
-    padding: 14px 16px;
-    text-align: left;
+.user-table-header {
+  background-color: #f8f9fa;
+}
+
+.user-table-row {
+  display: flex;
+  align-items: center;
+
+  &.header-row {
     font-weight: 600;
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    min-width: 40px;
+    background-color: #f7faff;
+  }
 
-    &.status {
-      min-width: 90px;
+  &:not(.header-row) {
+    border-bottom: 1px solid #e8ecef;
+    transition: background-color 0.15s;
+
+    &:last-child {
+      border-bottom: none;
     }
 
-    &.sortable {
-      cursor: pointer;
-      user-select: none;
+    &:hover {
+      background-color: #f5f7fa;
+      outline: 2px solid #3d70d2;
+      outline-offset: -2px;
+    }
+  }
+}
 
-      &:hover {
-        background-color: #3d5166;
-      }
+.col {
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  color: #34495e;
+  flex-shrink: 0;
+
+  &.sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background-color: #708aa7;
     }
   }
 
-  td.currency_type {
+  .sort-icon {
+    margin-left: 4px;
+    font-style: normal;
+    opacity: 0.75;
+  }
+
+  &.currency_type {
     text-align: right;
 
     div.positive {
-      color: rgb( 2, 153, 2;)
+      color: rgb(2, 153, 2);
     }
 
     div.negative {
@@ -354,48 +388,25 @@ h1 {
     }
   }
 
-  td {
-    span.spn_phone {
-      color: #999;
-    }
-
-    span.spn_name {
-      color: #000;
-    }
+  span.spn_phone {
+    color: #999;
   }
 
+  span.spn_name {
+    color: #000;
+  }
 }
 
-.user-table th.sortable:hover {
-  background-color: #708aa7;
-}
-
-.sort-icon {
-  margin-left: 4px;
-  font-style: normal;
-  opacity: 0.75;
-}
-
-.user-table tbody tr {
-  border-bottom: 1px solid #e8ecef;
-  transition: background-color 0.15s;
-}
-
-.user-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.user-table tbody tr:hover {
-  background-color: #f5f7fa;
-  outline: 2px solid #3d70d2;
-  outline-offset: -2px;
-}
-
-.user-table td {
-  padding: 14px 16px;
-  font-size: 0.95rem;
-  color: #34495e;
-}
+.col-check  { flex: 0 0 10px; }
+.col-id     { flex: 0 0 20px; }
+.col-edit   { flex: 0 0 30px; padding-left: 8px; padding-right: 8px; }
+.col-name   { flex: 0 0 160px; }
+.col-desc   { flex: 1 1 0;}
+.col-status { flex: 0 0 100px; font-weight: 10pt; }
+.col-rate   { flex: 0 0 90px; }
+.col-balance { flex: 0 0 100px; }
+.col-deposit { flex: 0 0 90px; }
+.col-actions { flex: 0 0 52px; }
 
 .status-badge {
   display: inline-block;
@@ -429,99 +440,99 @@ h1 {
 .actions-cell {
   position: relative;
   width: 40px;
-}
 
-.action-menu-wrapper {
-  position: relative;
-  display: inline-block;
-}
+  .action-menu-wrapper {
+    position: relative;
+    display: inline-block;
 
-.action-dots {
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 1.1rem;
-  color: #666;
-
-  &:hover {
-    background-color: #e8ecef;
-    color: #333;
-  }
-}
-
-.search-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 8px;
-  color: #888;
-  pointer-events: none;
-  font-size: 0.9rem;
-}
-
-.search-wrapper input {
-  padding-left: 28px;
-}
-
-.action-dropdown {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
-  background: #fff;
-  border: 1px solid #dde2e8;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  min-width: 205px;
-  z-index: 100;
-  padding: 6px 0;
-
-  hr {
-    border: none;
-    border-top: 1px solid #e8ecef;
-    margin: 4px 0;
-  }
-
-  button {
-    display: inline;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px 16px;
-    background: none;
-    border: none;
-    text-align: right;
-    font-size: 0.9rem;
-    color: #00F;
-    cursor: pointer;
-
-    span {
-      float: left;
-    }
-
-    &:hover {
-      background-color: #f5f7fa;
-    }
-
-    &.danger {
-      color: #be2b3a;
+    .action-dots {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      color: #666;
 
       &:hover {
-        background-color: #fdf0f1;
+        background-color: #e8ecef;
+        color: #333;
       }
     }
 
-    &.cost_details_button {
-      color: #0F0;
+    .action-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 4px);
+      background: #fff;
+      border: 1px solid #dde2e8;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      min-width: 205px;
+      z-index: 100;
+      padding: 6px 0;
+
+      hr {
+        border: none;
+        border-top: 1px solid #e8ecef;
+        margin: 4px 0;
+      }
+
+      button {
+        display: inline;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 16px;
+        background: none;
+        border: none;
+        text-align: right;
+        font-size: 0.9rem;
+        color: #00F;
+        cursor: pointer;
+
+        span {
+          float: left;
+        }
+
+        &:hover {
+          background-color: #f5f7fa;
+        }
+
+        &.danger {
+          color: #be2b3a;
+
+          &:hover {
+            background-color: #fdf0f1;
+          }
+        }
+
+        &.cost_details_button {
+          color: #0F0;
+        }
+      }
     }
   }
 }
 
 div#user-table-filters {
   text-align: left;
+
+  .search-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+
+    .search-icon {
+      position: absolute;
+      left: 8px;
+      color: #888;
+      pointer-events: none;
+      font-size: 0.9rem;
+    }
+
+    input {
+      padding-left: 28px;
+    }
+  }
 
   button.add_new_user {
     float: right;
@@ -546,66 +557,67 @@ div#user-table-filters {
   color: #555;
   flex-wrap: wrap;
   gap: 8px;
-}
 
-.pagination-controls {
-  display: flex;
-  gap: 4px;
+  .pagination-size {
+    label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
 
-  span {
-    margin-top: 10px;
+      select {
+        border: 1px solid #dde2e8;
+        border-radius: 6px;
+        padding: 4px 6px;
+        font-size: 0.88rem;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    gap: 4px;
+
+    span {
+      margin-top: 10px;
+    }
+
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #dde2e8;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      color: #34495e;
+      transition: background 0.15s, color 0.15s;
+
+      &:hover:not(:disabled):not(.ellipsis) {
+        background: #f0f4ff;
+        border-color: #00F;
+        color: #00F;
+      }
+
+      &.active {
+        background: #00F;
+        color: #fff;
+        border-color: #00F;
+        font-weight: 600;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      &.ellipsis {
+        border: none;
+        background: none;
+        cursor: default;
+      }
+    }
   }
 }
-
-.page-btn {
-  min-width: 32px;
-  height: 32px;
-  padding: 0 8px;
-  border: 1px solid #dde2e8;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.88rem;
-  color: #34495e;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover:not(:disabled):not(.ellipsis) {
-    background: #f0f4ff;
-    border-color: #00F;
-    color: #00F;
-  }
-
-  &.active {
-    background: #00F;
-    color: #fff;
-    border-color: #00F;
-    font-weight: 600;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  &.ellipsis {
-    border: none;
-    background: none;
-    cursor: default;
-  }
-}
-
-.pagination-size label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  select {
-    border: 1px solid #dde2e8;
-    border-radius: 6px;
-    padding: 4px 6px;
-    font-size: 0.88rem;
-    cursor: pointer;
-  }
-}
-
 </style>
