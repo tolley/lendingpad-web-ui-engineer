@@ -14,9 +14,11 @@
             <input v-model="form.phone" type="tel" placeholder="10-digit phone" />
           </label>
         </div>
-        <label>Description
-          <input v-model="form.description" type="text" placeholder="Loan type or description" />
-        </label>
+        <div class="form-full">
+          <label>Description
+            <input v-model="form.description" type="text" placeholder="Loan type or description" />
+          </label>
+        </div>
         <div class="form-row">
           <label>Status
             <select v-model="form.status" required aria-required="true">
@@ -113,6 +115,7 @@ export default {
         cursor: pointer;
         font-size: 1rem;
         color: #888;
+        flex-shrink: 0;
 
         &:hover {
           color: #333;
@@ -132,7 +135,6 @@ export default {
         font-size: 0.85rem;
         font-weight: 600;
         color: #555;
-        flex: 1;
 
         input, select {
           padding: 8px 10px;
@@ -151,7 +153,22 @@ export default {
 
       .form-row {
         display: flex;
+        flex-wrap: wrap;
         gap: 16px;
+        align-items: flex-start;
+
+        label {
+          flex: 1 1 180px;
+        }
+      }
+
+      .form-full {
+        display: flex;
+        flex-direction: column;
+
+        label {
+          flex: 1 1 100%;
+        }
       }
 
       .modal-actions {
